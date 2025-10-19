@@ -6,10 +6,18 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\TwoFactor;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
+use App\Livewire\Shop\ProductList;
+use App\Livewire\Shop\ProductShow;
+use App\Livewire\Shop\CategoryShow;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+Route::get('/', ProductList::class)->name('home');
+Route::get('/tienda', ProductList::class)->name('shop.index');
+Route::get('/producto/{slug}', ProductShow::class)->name('shop.product');
+Route::get('/categoria/{slug}', CategoryShow::class)->name('shop.category');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
