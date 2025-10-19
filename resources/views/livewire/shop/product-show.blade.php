@@ -132,15 +132,7 @@
                         </div>
                     @endif
 
-                    <button wire:click="addToCart"
-                        class="w-full bg-indigo-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        {{ !$product->inStock() ? 'disabled' : '' }}>
-                        @if ($product->inStock())
-                            {{ $product->isDigital() ? 'Comprar ahora' : 'Añadir al carrito' }}
-                        @else
-                            Agotado
-                        @endif
-                    </button>
+                    <livewire:cart.add-to-cart :product-id="$product->id" :variant-id="$selectedVariant" :quantity="$quantity" />
 
                     @if (session()->has('message'))
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">

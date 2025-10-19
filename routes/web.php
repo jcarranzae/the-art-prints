@@ -9,6 +9,9 @@ use Laravel\Fortify\Features;
 use App\Livewire\Shop\ProductList;
 use App\Livewire\Shop\ProductShow;
 use App\Livewire\Shop\CategoryShow;
+use App\Livewire\Cart\CartPage;
+use App\Livewire\Checkout\CheckoutPage;
+use App\Livewire\Order\OrderConfirmation;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,6 +21,11 @@ Route::get('/', ProductList::class)->name('home');
 Route::get('/tienda', ProductList::class)->name('shop.index');
 Route::get('/producto/{slug}', ProductShow::class)->name('shop.product');
 Route::get('/categoria/{slug}', CategoryShow::class)->name('shop.category');
+
+
+Route::get('/carrito', CartPage::class)->name('shop.cart');
+Route::get('/checkout', CheckoutPage::class)->name('checkout')->middleware('auth');
+Route::get('/pedido/{orderNumber}', OrderConfirmation::class)->name('order.confirmation')->middleware('auth');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
