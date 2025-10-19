@@ -15,6 +15,9 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <meta name="stripe-public-key" content="{{ config('services.stripe.public_key') }}">
+    @vite(['resources/js/stripe.js'])
 </head>
 
 <body class="font-sans antialiased">

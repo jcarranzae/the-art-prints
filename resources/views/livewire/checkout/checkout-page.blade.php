@@ -88,7 +88,6 @@
                             </div>
                         </div>
 
-                        <!-- Dirección de envío diferente -->
                         <div class="mt-4">
                             <label class="flex items-center cursor-pointer">
                                 <input type="checkbox" wire:model.live="different_shipping" class="mr-2">
@@ -97,7 +96,7 @@
                         </div>
                     </div>
 
-                    <!-- Dirección de envío (si es diferente) -->
+                    <!-- Dirección de envío -->
                     @if ($different_shipping)
                         <div class="bg-white rounded-lg shadow p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Dirección de envío</h2>
@@ -141,6 +140,54 @@
                         </div>
                     @endif
 
+                    <!-- Método de Pago -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-xl font-bold text-gray-900 mb-4">Método de Pago</h2>
+
+                        <div class="space-y-3">
+                            <label
+                                class="flex items-center cursor-pointer p-4 border-2 rounded-lg transition {{ $payment_method === 'stripe' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300 hover:border-gray-400' }}">
+                                <input type="radio" wire:model="payment_method" value="stripe"
+                                    class="mr-3 text-indigo-600 focus:ring-indigo-500">
+                                <div class="flex items-center flex-1">
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-gray-900">Tarjeta de Crédito/Débito</div>
+                                        <div class="text-sm text-gray-600">Pago seguro con Stripe</div>
+                                    </div>
+                                    <div class="text-2xl">💳</div>
+                                </div>
+                            </label>
+
+                            <label
+                                class="flex items-center cursor-pointer p-4 border-2 rounded-lg transition {{ $payment_method === 'paypal' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300 hover:border-gray-400' }}">
+                                <input type="radio" wire:model="payment_method" value="paypal"
+                                    class="mr-3 text-indigo-600 focus:ring-indigo-500">
+                                <div class="flex items-center flex-1">
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-gray-900">PayPal</div>
+                                        <div class="text-sm text-gray-600">Paga con tu cuenta PayPal</div>
+                                    </div>
+                                    <div class="text-2xl">🅿️</div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <div class="text-sm text-gray-600">
+                                    <p class="font-medium text-gray-900 mb-1">Pago 100% Seguro</p>
+                                    <p>Tus datos de pago están protegidos con encriptación SSL. No almacenamos
+                                        información de tarjetas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Notas adicionales -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Notas del pedido (opcional)</label>
@@ -155,7 +202,6 @@
                     <div class="bg-white rounded-lg shadow p-6 sticky top-24">
                         <h2 class="text-xl font-bold text-gray-900 mb-4">Resumen del pedido</h2>
 
-                        <!-- Productos -->
                         <div class="space-y-3 mb-4">
                             @foreach ($cartItems as $item)
                                 <div class="flex justify-between text-sm">
@@ -166,7 +212,6 @@
                             @endforeach
                         </div>
 
-                        <!-- Cupón -->
                         <div class="mb-4 pb-4 border-b">
                             <div class="flex gap-2">
                                 <input type="text" wire:model="coupon_code" placeholder="Código de descuento"
@@ -184,7 +229,6 @@
                             @endif
                         </div>
 
-                        <!-- Totales -->
                         <div class="space-y-3 border-t pt-4">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Subtotal</span>
@@ -203,8 +247,10 @@
                         </div>
 
                         <button type="submit"
-                            class="w-full mt-6 bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition">
-                            Realizar pedido
+                            class="w-full mt-6 bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove>Realizar pedido</span>
+                            <span wire:loading>Procesando...</span>
                         </button>
 
                         <p class="text-xs text-gray-500 text-center mt-4">
@@ -214,5 +260,11 @@
                 </div>
             </div>
         </form>
+
+        @if (session()->has('error'))
+            <div class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg">
+                {{ session('error') }}
+            </div>
+        @endif
     </div>
 </div>

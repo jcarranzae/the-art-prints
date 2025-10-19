@@ -1,6 +1,9 @@
 <?php
 
-// app/Livewire/Checkout/CheckoutPage.php
+// ============================================
+// ACTUALIZAR CheckoutPage - app/Livewire/Checkout/CheckoutPage.php
+// ============================================
+
 namespace App\Livewire\Checkout;
 
 use Livewire\Component;
@@ -8,6 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
 use App\Services\CartService;
+use App\Services\PaymentService;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
@@ -67,20 +71,18 @@ class CheckoutPage extends Component
     #[Validate('nullable|required_if:different_shipping,true|string|max:100')]
     public $shipping_country = '';
 
-    public $payment_method = 'card';
+    public $payment_method = 'stripe';
     public $coupon_code = '';
     public $appliedCoupon = null;
     public $notes = '';
 
     public function mount()
     {
-        // Verificar que hay items en el carrito
         $cartService = app(CartService::class);
         if ($cartService->getCartCount() === 0) {
             return redirect()->route('shop.index');
         }
 
-        // Pre-llenar con datos del usuario si está autenticado
         if (Auth::check()) {
             $this->email = Auth::user()->email;
             $this->billing_first_name = Auth::user()->name;
@@ -102,7 +104,6 @@ class CheckoutPage extends Component
         DB::beginTransaction();
 
         try {
-            // Calcular totales
             $subtotal = $cartItems->sum(fn($item) => $item->getTotal());
             $discount = 0;
             $couponId = null;
@@ -112,12 +113,10 @@ class CheckoutPage extends Component
                 $couponId = $this->appliedCoupon->id;
             }
 
-            // Por ahora, shipping y tax son 0
             $shipping_cost = 0;
             $tax = 0;
             $total = $subtotal - $discount + $shipping_cost + $tax;
 
-            // Crear orden
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'email' => $this->email,
@@ -150,7 +149,6 @@ class CheckoutPage extends Component
                 'notes' => $this->notes,
             ]);
 
-            // Crear items de la orden
             foreach ($cartItems as $cartItem) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -162,7 +160,6 @@ class CheckoutPage extends Component
                     'total' => $cartItem->getTotal(),
                 ]);
 
-                // Reducir stock para productos físicos
                 if ($cartItem->product->isPhysical() && $cartItem->product->track_inventory) {
                     if ($cartItem->variant) {
                         $cartItem->variant->decrement('stock', $cartItem->quantity);
@@ -171,11 +168,9 @@ class CheckoutPage extends Component
                     }
                 }
 
-                // Incrementar ventas
                 $cartItem->product->incrementSales($cartItem->quantity);
             }
 
-            // Marcar cupón como usado
             if ($this->appliedCoupon && Auth::check()) {
                 $this->appliedCoupon->users()->attach(Auth::id(), [
                     'order_id' => $order->id,
@@ -184,14 +179,27 @@ class CheckoutPage extends Component
                 $this->appliedCoupon->incrementUsage();
             }
 
-            // Limpiar carrito
-            $cartService->clearCart();
-
             DB::commit();
 
-            // Redirigir a página de confirmación
-            session()->flash('message', '¡Pedido realizado con éxito!');
-            return redirect()->route('order.confirmation', $order->order_number);
+            $paymentService = app(PaymentService::class);
+
+            if ($this->payment_method === 'stripe') {
+                $session = $paymentService->createStripeCheckoutSession($order);
+                $order->update(['payment_id' => $session->id]);
+                $cartService->clearCart();
+                return redirect($session->url);
+                
+            } elseif ($this->payment_method === 'paypal') {
+                $result = $paymentService->createPayPalOrder($order);
+                
+                if ($result['success']) {
+                    $order->update(['payment_id' => $result['order_id']]);
+                    $cartService->clearCart();
+                    return redirect($result['approval_url']);
+                } else {
+                    throw new \Exception($result['error']);
+                }
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();

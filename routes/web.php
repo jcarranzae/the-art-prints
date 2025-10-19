@@ -21,6 +21,7 @@ use App\Livewire\Admin\Orders\OrderShow;
 use App\Livewire\Admin\Coupons\CouponIndex;
 use App\Livewire\Admin\Coupons\CouponCreate;
 use App\Livewire\Admin\Coupons\CouponEdit;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -40,6 +41,8 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::post('/webhook/stripe', [PaymentController::class, 'stripeWebhook'])->name('webhook.stripe');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
@@ -57,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
             ),
         )
         ->name('two-factor.show');
+
+        Route::get('/pago/success/{order}', [PaymentController::class, 'success'])->name('payment.success');
+        Route::get('/pago/paypal/success/{order}', [PaymentController::class, 'paypalSuccess'])->name('payment.paypal.success');
+        Route::get('/pago/cancel/{order}', [PaymentController::class, 'cancel'])->name('payment.cancel');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

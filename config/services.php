@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'public_key' => env('STRIPE_PUBLIC_KEY'),
+        'secret' => env('STRIPE_SECRET_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
+    'paypal' => [
+        'mode' => env('PAYPAL_MODE', 'sandbox'),
+        'sandbox' => [
+            'client_id' => env('PAYPAL_SANDBOX_CLIENT_ID'),
+            'client_secret' => env('PAYPAL_SANDBOX_CLIENT_SECRET'),
+        ],
+        'live' => [
+            'client_id' => env('PAYPAL_LIVE_CLIENT_ID'),
+            'client_secret' => env('PAYPAL_LIVE_CLIENT_SECRET'),
+        ],
+    ],
+
 ];
