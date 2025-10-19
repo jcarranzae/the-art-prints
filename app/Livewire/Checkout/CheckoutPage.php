@@ -11,6 +11,7 @@ use App\Services\CartService;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
 #[Title('Checkout - TheArtPrints')]
@@ -80,9 +81,9 @@ class CheckoutPage extends Component
         }
 
         // Pre-llenar con datos del usuario si está autenticado
-        if (auth()->check()) {
-            $this->email = auth()->user()->email;
-            $this->billing_first_name = auth()->user()->name;
+        if (Auth::check()) {
+            $this->email = Auth::user()->email;
+            $this->billing_first_name = Auth::user()->name;
         }
     }
 
@@ -118,7 +119,7 @@ class CheckoutPage extends Component
 
             // Crear orden
             $order = Order::create([
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'billing_first_name' => $this->billing_first_name,
@@ -175,8 +176,8 @@ class CheckoutPage extends Component
             }
 
             // Marcar cupón como usado
-            if ($this->appliedCoupon && auth()->check()) {
-                $this->appliedCoupon->users()->attach(auth()->id(), [
+            if ($this->appliedCoupon && Auth::check()) {
+                $this->appliedCoupon->users()->attach(Auth::id(), [
                     'order_id' => $order->id,
                     'used_at' => now(),
                 ]);

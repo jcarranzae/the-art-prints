@@ -8,6 +8,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
 use App\Services\CartService;
+use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
 #[Title('Carrito - TheArtPrints')]
@@ -74,7 +75,7 @@ class CartPage extends Component
             return;
         }
 
-        if (auth()->check() && !$coupon->canBeUsedBy(auth()->user())) {
+        if (Auth::check() && !$coupon->canBeUsedBy(Auth::user())) {
             $this->couponError = 'Ya has usado este cupón el máximo de veces permitido';
             return;
         }

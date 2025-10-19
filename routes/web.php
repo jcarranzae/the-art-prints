@@ -12,6 +12,15 @@ use App\Livewire\Shop\CategoryShow;
 use App\Livewire\Cart\CartPage;
 use App\Livewire\Checkout\CheckoutPage;
 use App\Livewire\Order\OrderConfirmation;
+use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Products\ProductIndex;
+use App\Livewire\Admin\Products\ProductCreate;
+use App\Livewire\Admin\Products\ProductEdit;
+use App\Livewire\Admin\Orders\OrderIndex;
+use App\Livewire\Admin\Orders\OrderShow;
+use App\Livewire\Admin\Coupons\CouponIndex;
+use App\Livewire\Admin\Coupons\CouponCreate;
+use App\Livewire\Admin\Coupons\CouponEdit;
 
 Route::get('/', function () {
     return view('welcome');
@@ -48,6 +57,24 @@ Route::middleware(['auth'])->group(function () {
             ),
         )
         ->name('two-factor.show');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', Dashboard::class)->name('dashboard');
+    
+    // Productos
+    Route::get('/productos', ProductIndex::class)->name('products.index');
+    Route::get('/productos/crear', ProductCreate::class)->name('products.create');
+    Route::get('/productos/{id}/editar', ProductEdit::class)->name('products.edit');
+    
+    // Pedidos
+    Route::get('/pedidos', OrderIndex::class)->name('orders.index');
+    Route::get('/pedidos/{id}', OrderShow::class)->name('orders.show');
+    
+    // Cupones
+    Route::get('/cupones', CouponIndex::class)->name('coupons.index');
+    Route::get('/cupones/crear', CouponCreate::class)->name('coupons.create');
+    Route::get('/cupones/{id}/editar', CouponEdit::class)->name('coupons.edit');
 });
 
 require __DIR__.'/auth.php';

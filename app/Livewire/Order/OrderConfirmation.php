@@ -5,9 +5,12 @@ namespace App\Livewire\Order;
 
 use Livewire\Component;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 use App\Models\Order;
+use Illuminate\Support\Facades\Auth;
 
 #[Layout('layouts.app')]
+#[Title('Confirmación de Pedido - TheArtPrints')]
 class OrderConfirmation extends Component
 {
     public Order $order;
@@ -19,14 +22,13 @@ class OrderConfirmation extends Component
             ->firstOrFail();
 
         // Verificar que el usuario tenga acceso a esta orden
-        if (!auth()->check() || auth()->id() !== $this->order->user_id) {
+        if (!Auth::check() || Auth::id() !== $this->order->user_id) {
             abort(403);
         }
     }
 
     public function render()
     {
-        return view('livewire.order.order-confirmation')
-            ->title('Confirmación de Pedido - TheArtPrints');
+        return view('livewire.order.order-confirmation');
     }
 }
